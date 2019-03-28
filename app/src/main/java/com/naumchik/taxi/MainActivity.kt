@@ -105,10 +105,12 @@ class MainActivity : AppCompatActivity() {
     private fun calculateRotationAngle(): Float {
         val atanX = (startX - destX).toDouble()
         val atanY = (startY - destY).toDouble()
-        val atan = Math.atan(-atanX / -atanY)
+        if (atanX > 0 && atanY > 0) {
+            val atan = Math.atan(-atanX / -atanY)
+            angle = if (startY < destY) 180 - atan.toDegrees() else (180 - atan.toDegrees()) + 180
+        }
 
-        return if (startY < destY) 180 - Math.toDegrees(atan).toFloat()
-        else (180 - Math.toDegrees(atan).toFloat()) + 180
+        return angle
     }
 
     private fun enableOnTouchListener(enable: Boolean) {
@@ -123,4 +125,6 @@ class MainActivity : AppCompatActivity() {
         const val DURATION_ROTATION = 1000L
         const val DURATION_MOVING = 2000L
     }
+
+    private fun Double.toDegrees(): Float = Math.toDegrees(this).toFloat()
 }
