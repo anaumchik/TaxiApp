@@ -1,9 +1,11 @@
 package com.naumchik.taxi
 
 import android.animation.Animator
+import android.content.Context
 import android.graphics.Point
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageView
@@ -21,9 +23,7 @@ class MainActivity : AppCompatActivity() {
     private val onTouchListener = View.OnTouchListener { _, event ->
         destX = event.x
         destY = event.y
-        when (event.action) {
-            MotionEvent.ACTION_DOWN -> startRotationAnimation()
-        }
+        if (event.action == MotionEvent.ACTION_DOWN) startRotationAnimation()
         true
     }
 
@@ -54,18 +54,24 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startRotationAnimation() {
+        val rotateAngle = calculateRotationAngle()
+        log("rotateAngle: $rotateAngle")
+
         calculateScreenOffside()
+
         viewCar.animate()
-            .rotation(calculateRotationAngle())
+            .rotation(rotateAngle)
             .setDuration(DURATION_ROTATION)
             .setListener(object : Animator.AnimatorListener {
                 override fun onAnimationStart(animation: Animator?) {
+                    log("startRotatingAnimation()")
                     enableOnTouchListener(false)
                 }
 
                 override fun onAnimationCancel(animation: Animator?) {}
                 override fun onAnimationRepeat(animation: Animator?) {}
                 override fun onAnimationEnd(animation: Animator?) {
+                    log("startMovingAnimation()")
                     startMovingAnimation()
                 }
             })
@@ -95,7 +101,7 @@ class MainActivity : AppCompatActivity() {
                     // set new start coordinates
                     startX = destX
                     startY = destY
-
+                    log("endMovingAnimation(). startX:$startX, startY:$startY, destX:$destX, destY:$destY")
                     enableOnTouchListener(true)
                 }
             })
@@ -105,12 +111,15 @@ class MainActivity : AppCompatActivity() {
     private fun calculateRotationAngle(): Float {
         val atanX = (startX - destX).toDouble()
         val atanY = (startY - destY).toDouble()
-        if (atanX > 0 && atanY > 0) {
-            val atan = Math.atan(-atanX / -atanY)
-            angle = if (startY < destY) 180 - atan.toDegrees() else (180 - atan.toDegrees()) + 180
+        val atan = if (atanY == 0.0) {
+            Math.atan(atanX).toDegrees()
+        } else {
+            Math.atan(atanX / atanY).toDegrees()
         }
 
-        return angle
+        log("atan: $atan")
+
+        return if (startY < destY) 180 - atan else (360 - atan)
     }
 
     private fun enableOnTouchListener(enable: Boolean) {
@@ -127,4 +136,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun Double.toDegrees(): Float = Math.toDegrees(this).toFloat()
+
+    private fun Context.log(message: String) = Log.d("TAG.D", message)
 }
