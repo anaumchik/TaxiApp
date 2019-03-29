@@ -24,6 +24,7 @@ class MainActivity : AppCompatActivity() {
     private val onTouchListener = View.OnTouchListener { _, event ->
         destX = event.x
         destY = event.y
+        log("x:$destX, y:$destY")
         if (event.action == MotionEvent.ACTION_DOWN) startRotationAnimation()
         true
     }
@@ -57,13 +58,14 @@ class MainActivity : AppCompatActivity() {
     private fun startRotationAnimation() {
         pbMoving.visibility = View.VISIBLE
 
-        val rotateAngle = calculateRotationAngle()
-        log("rotateAngle: $rotateAngle")
+        destX -= (CAR_WIDTH / 2)
+        destY -= (CAR_HEIGHT / 2)
 
+        angle = calculateRotationAngle()
+        log(" angle: $angle")
         calculateScreenOffside()
-
         viewCar.animate()
-            .rotation(rotateAngle)
+            .rotation(angle)
             .setDuration(DURATION_ROTATION)
             .setListener(object : Animator.AnimatorListener {
                 override fun onAnimationStart(animation: Animator?) {
@@ -102,9 +104,9 @@ class MainActivity : AppCompatActivity() {
                 override fun onAnimationRepeat(animation: Animator?) {}
                 override fun onAnimationEnd(animation: Animator?) {
                     // set new start coordinates
+                    log("endAnimation(). startX:$startX, startY:$startY, destX:$destX, destY:$destY")
                     startX = destX
                     startY = destY
-                    log("endMovingAnimation(). startX:$startX, startY:$startY, destX:$destX, destY:$destY")
                     if (!isNeedToBeMoved) isNeedToBeMoved = true
                     enableOnTouchListener(true)
                     pbMoving.visibility = View.GONE
