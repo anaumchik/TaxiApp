@@ -84,13 +84,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun calculateScreenOffside() {
-        val display = windowManager.defaultDisplay
         val size = Point()
-        display.getSize(size)
-        val width = size.x
-        val height = size.y
-        if (destX > (width - CAR_WIDTH)) destX -= CAR_WIDTH
-        if (destY > (height - CAR_HEIGHT)) destY -= CAR_HEIGHT
+        windowManager.defaultDisplay.getSize(size)
+        if (destY > (size.y - CAR_HEIGHT)) destY -= CAR_HEIGHT
     }
 
     private fun startMovingAnimation() {
