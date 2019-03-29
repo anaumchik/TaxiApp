@@ -19,6 +19,7 @@ class MainActivity : AppCompatActivity() {
     private var destX: Float = 0f
     private var destY: Float = 0f
     private var angle = 180f
+    private var isNeedToBeMoved = true
 
     private val onTouchListener = View.OnTouchListener { _, event ->
         destX = event.x
@@ -54,6 +55,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startRotationAnimation() {
+        pbMoving.visibility = View.VISIBLE
+
         val rotateAngle = calculateRotationAngle()
         log("rotateAngle: $rotateAngle")
 
@@ -92,7 +95,7 @@ class MainActivity : AppCompatActivity() {
         viewCar.animate()
             .translationX(destX)
             .translationY(destY)
-            .setDuration(DURATION_MOVING)
+            .setDuration(if (isNeedToBeMoved) DURATION_MOVING else 0)
             .setListener(object : Animator.AnimatorListener {
                 override fun onAnimationStart(animation: Animator?) {}
                 override fun onAnimationCancel(animation: Animator?) {}
@@ -102,7 +105,9 @@ class MainActivity : AppCompatActivity() {
                     startX = destX
                     startY = destY
                     log("endMovingAnimation(). startX:$startX, startY:$startY, destX:$destX, destY:$destY")
+                    if (!isNeedToBeMoved) isNeedToBeMoved = true
                     enableOnTouchListener(true)
+                    pbMoving.visibility = View.GONE
                 }
             })
             .start()
@@ -117,6 +122,7 @@ class MainActivity : AppCompatActivity() {
             Math.atan(atanX / atanY).toDegrees()
         }
 
+        if (atan == 0f) isNeedToBeMoved = false
         log("atan: $atan")
 
         return if (startY < destY) 180 - atan else (360 - atan)
@@ -131,8 +137,8 @@ class MainActivity : AppCompatActivity() {
         const val CAR_WIDTH = 180
         const val CAR_HEIGHT = 360
 
-        const val DURATION_ROTATION = 1000L
-        const val DURATION_MOVING = 2000L
+        const val DURATION_ROTATION = 750L
+        const val DURATION_MOVING = 1500L
     }
 
     private fun Double.toDegrees(): Float = Math.toDegrees(this).toFloat()
